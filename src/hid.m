@@ -1,3 +1,6 @@
+clc; 
+clear;
+close all;
 javaaddpath('../lib/hid4java-0.5.1.jar');
 
 import org.hid4java.*;
@@ -9,7 +12,7 @@ import java.lang.*;
 
 pp = PacketProcessor(7);
 
-%Create an array of 32 bit floaing point zeros to load an pass to the
+%Create an array of 32 bit floating point zeros to load an pass to the
 %packet processor
 values = zeros(15, 1, 'single');
 sinWaveInc = 10.0;
@@ -26,13 +29,14 @@ range = 400.0;
      end
      tic
      %Process command and print the returning values
-     returnValues = pp.command(37, values);
+     returnValues = pp.command(38, values);
      toc
      disp('sent');
      disp(values);
      disp('got');
      disp(returnValues);
      pause(0.1) %timeit(returnValues)
+     dlmwrite('Lab1CSV.csv', transpose(returnValues), '-append');
  end
 pp.shutdown()
 clear java;
@@ -84,3 +88,6 @@ clear java;
 %    data  = tagValue(thisListitem,name);
 %    fprintf('%s \t%f\n',name,data);
 % end
+% -224
+% 341
+% -789
