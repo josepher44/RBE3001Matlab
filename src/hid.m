@@ -54,23 +54,67 @@ while 1
      end
      %pause(.01)
      %wait
-     scalingFactor = 11.44;
-     encoder = returnValues(1);
-     deg = encoder/scalingFactor;
-     Array=csvread('Lab1CSV.csv');
-     col1 = Array(:, 1);
-     col2 = (Array(:, 2))/scalingFactor;
+     
+     %constant that maps ticks to degrees
+     baseScalingFactor = 11.44;
+     
+     %encoder values read from returnValues
+     baseEncoder = returnValues(1);
+     shoulderEncoder = returnValues(4);
+     elbowEncoder = returnValues(7);
+     
+     %encoder values mapped to degrees
+     baseDeg = baseEncoder / baseScalingFactor;
+     shoulderDeg = shoulderEncoder/ baseScalingFactor;
+     elbowDeg = elbowEncoder/baseScalingFactor;
+     
+     %velocity values read
+     baseVel = returnValues(2);
+     shoulderVel=returnValues(5);
+     elbowVel = returnValues(8);
+     
+     linkLength = 100;
+     %top of link 1 (base)
+     x1 = 0;
+     y1 = linkLength;
+     
+     %top of link 2 (shoulder)
+     x2 = x1 + cosd(shoulderDeg) * linkLength;
+     y2 = y1 + sind(shoulderDeg) * linkLength;
+     
+     %top of link 3 (elbow)
+     x3 = x2 + cosd(elbowDeg) * linkLength;
+     y3 = y2 + sind(elbowDeg) * linkLength;
+     
+     link1 = [0 x1; 0 y1];
+     link2 = [x1 x2; y1 y2];
+     link3 = [x2 x3; y2 y3];
+     M = [link1; link2; link3];
+     
      hold on;
-     axis([-100 100 -100 100]);
-     x1 = cosd(deg)*100;
-     y1 = sind(deg)*100;
-     vals = [0 x1; 0 y1];
-     plot(col1, col2)
-     plotv(vals, '-o')
+     axis([0 300 0 300]);
+     plot([0 x1 x2 x3], [0 y1 y2 y3],'-o');
      drawnow;
      hold off;
      pause(0.1);
      clf;
+     
+     
+     Array=csvread('Lab1CSV.csv');
+     col1 = Array(:, 1);
+     col2 = (Array(:, 2))/baseScalingFactor;
+     %hold on;
+     %axis([-100 100 -100 100]);
+     %x1 = cosd(deg)*100;
+     %y1 = sind(deg)*100;
+     %vals = [0 x1; 0 y1];
+     %plot(col1, col2)
+     %plotv(vals, '-o')
+     %drawnow;
+     %hold off;
+     %pause(0.1);
+     %clf;
+     
 end
 
 pp.shutdown()
