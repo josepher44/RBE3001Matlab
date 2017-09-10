@@ -9,59 +9,99 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.lang.*;
 
-
 pp = PacketProcessor(7);
 
 %Create an array of 32 bit floating point zeros to load an pass to the
 %packet processor
 x = 0;
+
+%constant that maps ticks to degrees
+baseScalingFactor = 11.44;
+
+incrementer = 1;
+timer = 0;
+
+setpoints1 = [0 0 0 0 0 -1];
+setpoints2 = [1225 667 311 29 1268 -1];
+setpoints3 = [-168 1417 2109 985 2049 -1];
+%setpoints1 = setpoints1/baseScalingFactor;
+%setpoints2 = setpoints2/baseScalingFactor;
+%setpoints3 = setpoints3/baseScalingFactor;
+currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
+currentEncoders = [0 0 0];
 while 1
     x= x+ 1;
+    
+
     values = zeros(15, 1, 'single');
     sinWaveInc = 10.0;
     range = 400.0;
     %Iterate through a sine wave for joint values
-     for k=1:sinWaveInc
-         for j=0:10
-             %Joint 1
-             values(1) = 0; 
-             %Send junk data for velocity and force targets
-             values(2) = 0;
-             values(3) = 3;
-             %Joint 2
-             values(4) = 0; 
-             %Send junk data for velocity and force targets
-             values(5) = 0;
-             values(6) = 3;
-             %Joint 3
-             values(7) = 0; 
-             %Send junk data for velocity and force targets
-             values(8) = 0;
-             values(9) = 3;
-         end
+% %    for k=1:sinWaveInc
+%          for j=0:10
+%              %Joint 1
+%              values(1) = 0; 
+%              %Send junk data for velocity and force targets
+%              values(2) = 0;
+%              values(3) = 3;
+%              %Joint 2
+%              values(4) = 0; 
+%              %Send junk data for velocity and force targets
+%              values(5) = 0;
+%              values(6) = 3;
+%              %Joint 3
+%              values(7) = 0; 
+%              %Send junk data for velocity and force targets
+%              values(8) = 0;
+%              values(9) = 3;
+%          end
+%    end
+    if(incrementer<6)
+
+        if (isAtSetpoints(currentSetpoint, currentEncoders)==3)
+            timer = timer+1;
+        end
+        if (timer>=10)
+            incrementer = incrementer+1;
+            timer=0;
+        end
+        disp(timer);
+        disp(incrementer);
+        values(1)=setpoints1(incrementer);
+        values(4)=setpoints2(incrementer);
+        values(7)=setpoints3(incrementer);
+    
+    
          tic
          %Process command and print the returning values
          returnValues = pp.command(38, values);
-         toc
-         disp('sent');
-         disp(values);
-         disp('got');
-         disp(returnValues);
+%          toc
+%          disp('sent');
+%          disp(values);
+%          disp('got');
+%          disp(returnValues);
+            disp('Current setpoints');
+            disp(currentSetpoint);
+            disp(currentEncoders);
          %Concatenate "loop incrementer" to encoder values
          toWrite = cat(1, x,returnValues);
          %pause(0.1) %timeit(returnValues)
          dlmwrite('Lab1CSV.csv', transpose(toWrite), '-append');
+         
      end
      %pause(.01)
      %wait
      
-     %constant that maps ticks to degrees
-     baseScalingFactor = 11.44;
+     
+     
+    
      
      %encoder values read from returnValues
      baseEncoder = returnValues(1);
      shoulderEncoder = returnValues(4);
      elbowEncoder = returnValues(7);
+     
+     currentEncoders = [baseEncoder shoulderEncoder elbowEncoder];
      
      %encoder values mapped to degrees
      baseDeg = baseEncoder / baseScalingFactor;
@@ -87,11 +127,11 @@ while 1
      y3 = y2 - cosd(elbowDeg+shoulderDeg) * linkLength;
 
      hold on;
-     axis([0 300 0 300]);
+     axis([-300 300 0 300]);
      plot([0 x1 x2 x3], [0 y1 y2 y3],'-o');
      drawnow;
      hold off;
-     pause(0.1);
+     %pause(0.1);
      clf;
      
      
@@ -111,9 +151,20 @@ while 1
      %clf;
      
 end
-
 pp.shutdown()
 clear java;
+
+   
+
+
+
+
+
+
+
+%Link 2: -2826 -4311
+
+%Link 3: -1693 to -4450
 %Load the xml file
 % xDoc = xmlread('seaArm.xml');
 % %All Arms
