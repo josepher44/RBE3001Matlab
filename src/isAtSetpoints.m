@@ -4,7 +4,7 @@ function isatsetpoints = isAtSetpoints(setpoints, encoders)
    range1 = 2310;
    range2 = 1485;
    range3 = 2757;
-   cutoff = [accuracy*range1 accuracy*range2 accuracy*range3];
+   cutoff = [accuracy*range1*0.4 accuracy*range2 accuracy*range3];
 
    isatsetpoints = 0;
    for i=1:3
