@@ -24,17 +24,17 @@ while 1
      for k=1:sinWaveInc
          for j=0:10
              %Joint 1
-             values(1) = 50; 
+             values(1) = 0; 
              %Send junk data for velocity and force targets
              values(2) = 0;
              values(3) = 3;
              %Joint 2
-             values(4) = 40; 
+             values(4) = 0; 
              %Send junk data for velocity and force targets
              values(5) = 0;
              values(6) = 3;
              %Joint 3
-             values(7) = 30; 
+             values(7) = 0; 
              %Send junk data for velocity and force targets
              values(8) = 0;
              values(9) = 3;
@@ -66,7 +66,7 @@ while 1
      %encoder values mapped to degrees
      baseDeg = baseEncoder / baseScalingFactor;
      shoulderDeg = shoulderEncoder/ baseScalingFactor;
-     elbowDeg = elbowEncoder/baseScalingFactor;
+     elbowDeg = (elbowEncoder/baseScalingFactor);
      
      %velocity values read
      baseVel = returnValues(2);
@@ -83,14 +83,9 @@ while 1
      y2 = y1 + sind(shoulderDeg) * linkLength;
      
      %top of link 3 (elbow)
-     x3 = x2 + cosd(elbowDeg) * linkLength;
-     y3 = y2 + sind(elbowDeg) * linkLength;
-     
-     link1 = [0 x1; 0 y1];
-     link2 = [x1 x2; y1 y2];
-     link3 = [x2 x3; y2 y3];
-     M = [link1; link2; link3];
-     
+     x3 = x2 + sind(elbowDeg+shoulderDeg) * linkLength;
+     y3 = y2 - cosd(elbowDeg+shoulderDeg) * linkLength;
+
      hold on;
      axis([0 300 0 300]);
      plot([0 x1 x2 x3], [0 y1 y2 y3],'-o');
