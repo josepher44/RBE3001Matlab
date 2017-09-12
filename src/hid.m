@@ -43,16 +43,24 @@ timer = 0;
 % setpoints2 = [1030 667 311 29 1268 -1];
 % setpoints3 = [1030 1417 2109 985 2049 -1];
 
-% %9
-setpoints1 = [0 0 0 0 0 -1];
-setpoints2 = [777 -100 365 29 1268 -1];
-setpoints3 = [-140 825 -295 985 2049 -1];
+%9
+% setpoints1 = [0 0 0 0];
+% setpoints2 = [777 -100 365 777];
+% setpoints3 = [-140 825 -295 -140];
 % 
 % % 10
 % hugeMatrix = [badInterpol(365,-295,-100,825) badInterpol(-100,825,777,-140) badInterpol(777,-140,365,-295)];
 % setpoints1= zeros(30, 1, 'single');
 % setpoints2 = hugeMatrix(1:1,:);
 % setpoints3 = hugeMatrix(2:2,:);
+
+% 10 raw interpolation
+Array=csvread('10-point-triangle.csv~');
+setpoints1 = Array(:, 1);
+setpoints2 = Array(:, 2);
+setpoints3 = Array(:, 3);
+
+disp(setpoints2);
 
 currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
 currentEncoders = [0 0 0];
@@ -64,12 +72,14 @@ while 1
     values = zeros(15, 1, 'single');
     
     %if(incrementer<6)
-    if(incrementer<31)
+    if(incrementer<35)
     
         if (isAtSetpoints(currentSetpoint, currentEncoders)==3)
             timer = timer+1;
+        else
+            timer = 0;
         end
-        if (timer>=20)
+        if (timer>=5)
             incrementer = incrementer+1;
             if(incrementer==30)
                 incrementer=0;
@@ -100,7 +110,7 @@ while 1
     %Concatenate "loop incrementer" to encoder values
     toWrite = cat(1, x,returnValues);
     %pause(0.1) %timeit(returnValues)
-    dlmwrite('Lab1CSV.csv', transpose(toWrite), '-append');
+    %dlmwrite('Lab1CSV.csv', transpose(toWrite), '-append');
          
      
      %pause(.01)
@@ -160,7 +170,12 @@ while 1
      
      %Write tip position to csv
      dlmwrite('Lab2CSV.csv', transpose([x3; y3]), '-append');
+     
+     %Write encoder values to csv
+     dlmwrite('Lab2CSV-setpoints.csv', [baseEncoder shoulderEncoder elbowEncoder], '-append');
 
+    
+     
      
      hold on;
      axis([-300 300 0 300]);
