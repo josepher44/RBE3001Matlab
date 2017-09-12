@@ -47,12 +47,6 @@ timer = 0;
 % setpoints1 = [0 0 0 0];
 % setpoints2 = [777 -100 365 777];
 % setpoints3 = [-140 825 -295 -140];
-% 
-% % 10
-% hugeMatrix = [badInterpol(365,-295,-100,825) badInterpol(-100,825,777,-140) badInterpol(777,-140,365,-295)];
-% setpoints1= zeros(30, 1, 'single');
-% setpoints2 = hugeMatrix(1:1,:);
-% setpoints3 = hugeMatrix(2:2,:);
 
 % 10 raw interpolation
 Array=csvread('10-point-triangle.csv~');
