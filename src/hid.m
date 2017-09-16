@@ -1,3 +1,4 @@
+tic;
 clc; 
 clear;
 close all;
@@ -16,6 +17,7 @@ pp = PacketProcessor(7);
 %Create an array of 32 bit floating point zeros to load an pass to the
 %packet processor
 x = 0;
+y = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  PID
@@ -49,15 +51,38 @@ timer = 0;
 % setpoints3 = [-140 825 -295 -140];
 
 % 10 raw interpolation
-Array=csvread('10-point-triangle.csv~');
-setpoints1 = Array(:, 1);
-setpoints2 = Array(:, 2);
-setpoints3 = Array(:, 3);
+% Array=csvread('10-point-triangle.csv~');
+% setpoints1 = Array(:, 1);
+% setpoints2 = Array(:, 2);
+% setpoints3 = Array(:, 3);
+% 
+% disp(setpoints2);
+% 
+% currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
+% currentEncoders = [0 0 0];
+%%Lab 3
+cam = webcam();
+% while 1
+%     for times = 1:5
+%         max=100;
+%         for z = 10:max
+%             u=z/max;
+%             result = findRedCircle(cam,u);
+%             dlmwrite('Lab5CircleTime.csv', [u result], '-append');
+%         end
+%         Array = csvread('Lab5CircleTime.csv');
+%         col1 = Array(:, 1);
+%         col2 = Array(:, 2);
+%         scatter(col1,col2,4);
+%         x = lsline
+%         disp(lsline)
+%         disp("done");
+%     end
+%         
+% end
 
-disp(setpoints2);
 
-currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
-currentEncoders = [0 0 0];
+
 
 tic;
 while 1
@@ -162,35 +187,42 @@ while 1
      sy3 = sy2 - cosd(elbowSetDeg+shoulderSetDeg) * linkLength;
      
      
-     %Write tip position to csv
-     dlmwrite('Lab2CSV.csv', transpose([x3; y3]), '-append');
-     
-     %Write encoder values to csv
-     dlmwrite('Lab2CSV-setpoints.csv', [baseEncoder shoulderEncoder elbowEncoder], '-append');
-
-    
-     
-     
-     hold on;
-     axis([-300 300 0 300]);
-     plot([0 x1 x2 x3], [0 y1 y2 y3],'-o');
-     plot([0 sx1 sx2 sx3], [0 sy1 sy2 sy3],'-o');
-     drawnow;
-     hold off;
-     %pause(0.1);
-     clf;
-     
-     
-     Array=csvread('Lab2CSV.csv');
-     col1 = Array(:, 1);
-     col2 = Array(:, 2);
-     %axis([-100 100 -100 100]);
-     %x1 = cosd(deg)*100;
-     %y1 = sind(deg)*100;
-     %vals = [0 x1; 0 y1];
-     plot(col1, col2)
+%      %Write tip position to csv
+%      dlmwrite('Lab2CSV.csv', transpose([x3; y3]), '-append');
+%      
+%      %Write encoder values to csv
+%      dlmwrite('Lab2CSV-setpoints.csv', [baseEncoder shoulderEncoder elbowEncoder], '-append');
+% 
+%     
+%      
+%      
+%      hold on;
+%      axis([-300 300 0 300]);
+%      plot([0 x1 x2 x3], [0 y1 y2 y3],'-o');
+%      plot([0 sx1 sx2 sx3], [0 sy1 sy2 sy3],'-o');
+%      drawnow;
+%      hold off;
+%      %pause(0.1);
+%      clf;
+%      
+%      
+%      Array=csvread('Lab2CSV.csv');
+%      col1 = Array(:, 1);
+%      col2 = Array(:, 2);
+%      %axis([-100 100 -100 100]);
+%      %x1 = cosd(deg)*100;
+%      %y1 = sind(deg)*100;
+%      %vals = [0 x1; 0 y1];
+%      plot(col1, col2)
      %plotv(vals, '-o')
      %pause(0.1);
+     %camera runs at 9/sec
+     %try running the camera on a seperate thread
+        findRedCircle();
+
+%      r = img(:,:,1);
+%      g = img(:,:,2);
+%      b = img(:,:,3);
      
 end
 pp.shutdown()
