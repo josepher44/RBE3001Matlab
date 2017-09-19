@@ -46,9 +46,9 @@ timer = 0;
 % setpoints3 = [1030 1417 2109 985 2049 -1];
 
 %9
-% setpoints1 = [0 0 0 0];
-% setpoints2 = [777 -100 365 777];
-% setpoints3 = [-140 825 -295 -140];
+ setpoints1 = [300 -200 150 0];
+ setpoints2 = [777 -100 365 777];
+ setpoints3 = [-140 825 -295 -140];
 
 % 10 raw interpolation
 % Array=csvread('10-point-triangle.csv~');
@@ -58,10 +58,10 @@ timer = 0;
 % 
 % disp(setpoints2);
 % 
-% currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
-% currentEncoders = [0 0 0];
+ currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
+ currentEncoders = [0 0 0];
 %%Lab 3
-cam = webcam();
+%cam = webcam();
 % while 1
 %     for times = 1:5
 %         max=100;
@@ -149,7 +149,7 @@ while 1
      %encoder values mapped to degrees
      baseDeg = baseEncoder / baseScalingFactor;
      shoulderDeg = shoulderEncoder/ baseScalingFactor;
-     elbowDeg = (elbowEncoder/baseScalingFactor);
+     elbowDeg = (elbowEncoder/baseScalingFactor-90);
      
      %velocity values read
      baseVel = returnValues(2);
@@ -157,17 +157,27 @@ while 1
      elbowVel = returnValues(8);
      
      linkLength = 100;
+
+     %find setpoint in degrees
+     baseSetDeg = currentSetpoint(1)/baseScalingFactor;
+     shoulderSetDeg = currentSetpoint(2)/baseScalingFactor;
+     elbowSetDeg = currentSetpoint(3)/baseScalingFactor;
+
+    %3D Forward Position Kinematics
      %top of link 1 (base)
      x1 = 0;
-     y1 = linkLength;
+     y1 = 0;
+     z1 = linkLength;
      
      %top of link 2 (shoulder)
-     x2 = x1 + cosd(shoulderDeg) * linkLength;
-     y2 = y1 + sind(shoulderDeg) * linkLength;
+     x2 = sind(baseDeg) * (x1 + cosd(shoulderDeg) * linkLength);
+     y2 = cosd(baseDeg) * (y1 + cosd(shoulderDeg) * linkLength);
+     z2 = z1 + sind(shoulderDeg) * linkLength;
      
      %top of link 3 (elbow)
-     x3 = x2 + sind(elbowDeg+shoulderDeg) * linkLength;
-     y3 = y2 - cosd(elbowDeg+shoulderDeg) * linkLength;
+     x3 = sind(baseDeg) * (x2 + cosd(elbowDeg+shoulderDeg) * linkLength);
+     y3 = cosd(baseDeg) * (y2 + cosd(elbowDeg+shoulderDeg) * linkLength);
+     z3 = z2 + sind(elbowDeg+shoulderDeg) * linkLength;
      
      %find setpoint in degrees
      baseSetDeg = currentSetpoint(1)/baseScalingFactor;
@@ -176,15 +186,45 @@ while 1
      
      %top of arm setpoint
      sx1 = 0;
-     sy1 = linkLength;
+     sy1 = 0;
+     sz1 = linkLength;
      
      %top of shoulder setpoint
-     sx2 = sx1 + cosd(shoulderSetDeg) * linkLength;
-     sy2 = sy1 + sind(shoulderSetDeg) * linkLength;
+     sx2 = sind(baseDeg) * (sx1 + cosd(shoulderDeg) * linkLength);
+     sy2 = cosd(baseDeg) * (sy1 + cosd(shoulderDeg) * linkLength);
+     sz2 = sz1 + sind(shoulderDeg) * linkLength;
      
      %top of elbow setpoint
-     sx3 = sx2 + sind(elbowSetDeg+shoulderSetDeg) * linkLength;
-     sy3 = sy2 - cosd(elbowSetDeg+shoulderSetDeg) * linkLength;
+     sx3 = sind(baseDeg) * (sx2 + cosd(elbowDeg+shoulderDeg) * linkLength);
+     sy3 = cosd(baseDeg) * (sy2 + cosd(elbowDeg+shoulderDeg) * linkLength);
+     sz3 = sz2 + sind(elbowDeg+shoulderDeg) * linkLength;
+     
+     
+% %     2D Forward Position Kinematics
+%      %top of link 1 (base)
+%      x1 = 0;
+%      y1 = linkLength;
+%      
+%      %top of link 2 (shoulder)
+%      x2 = x1 + cosd(shoulderDeg) * linkLength;
+%      y2 = y1 + sind(shoulderDeg) * linkLength;
+%      
+%      %top of link 3 (elbow)
+%      x3 = x2 + sind(elbowDeg+shoulderDeg) * linkLength;
+%      y3 = y2 - cosd(elbowDeg+shoulderDeg) * linkLength;
+%
+%      
+%      %top of arm setpoint
+%      sx1 = 0;
+%      sy1 = linkLength;
+%      
+%      %top of shoulder setpoint
+%      sx2 = sx1 + cosd(shoulderSetDeg) * linkLength;
+%      sy2 = sy1 + sind(shoulderSetDeg) * linkLength;
+%      
+%      %top of elbow setpoint
+%      sx3 = sx2 + sind(elbowSetDeg+shoulderSetDeg) * linkLength;
+%      sy3 = sy2 - cosd(elbowSetDeg+shoulderSetDeg) * linkLength;
      
      
 %      %Write tip position to csv
@@ -197,13 +237,28 @@ while 1
 %      
 %      
 %      hold on;
-%      axis([-300 300 0 300]);
+%      axis([-300 300 0 300])cosd;
 %      plot([0 x1 x2 x3], [0 y1 y2 y3],'-o');
 %      plot([0 sx1 sx2 sx3], [0 sy1 sy2 sy3],'-o');
 %      drawnow;
 %      hold off;
 %      %pause(0.1);
 %      clf;
+
+
+%      3D plot
+       
+       
+       plot3([0 x1 x2 x3], [0 y1 y2 y3], [0 z1 z2 z3]);
+       xlim([-300 300]);
+       ylim([-300 300]);
+       zlim([-300 300]);
+       %plot([0 sx1 sx2 sx3], [0 sy1 sy2 sy3],'-o');
+       drawnow;
+       
+       %pause(0.1);
+       clf;
+
 %      
 %      
 %      Array=csvread('Lab2CSV.csv');
@@ -218,7 +273,7 @@ while 1
      %pause(0.1);
      %camera runs at 9/sec
      %try running the camera on a seperate thread
-        findRedCircle();
+%        findRedCircle();
 
 %      r = img(:,:,1);
 %      g = img(:,:,2);
