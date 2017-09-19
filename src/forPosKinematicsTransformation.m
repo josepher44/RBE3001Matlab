@@ -1,5 +1,5 @@
 function M = forPosKinematicsTransformation( q1, q2, q3 )
-%Takes 3 join values and returns 4x4 homogenous transformation
+%Takes 3 joint values and returns 4x4 homogenous transformation
 %matrix
 %   Detailed explanation goes here
 

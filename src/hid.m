@@ -41,14 +41,14 @@ timer = 0;
 %0,777,-140
 
 % %6-8
-% setpoints1 = [0 0 0 0 0 -1];
-% setpoints2 = [1030 667 311 29 1268 -1];
-% setpoints3 = [1030 1417 2109 985 2049 -1];
+setpoints1 = [0 0 0 0 0 -1];
+setpoints2 = [1030 667 311 29 1268 -1];
+setpoints3 = [1030 1417 2109 985 2049 -1];
 
 %9
- setpoints1 = [300 -200 150 0];
- setpoints2 = [777 -100 365 777];
- setpoints3 = [-140 825 -295 -140];
+%  setpoints1 = [300 -200 150 0];
+%  setpoints2 = [777 -100 365 777];
+%  setpoints3 = [-140 825 -295 -140];
 
 % 10 raw interpolation
 % Array=csvread('10-point-triangle.csv~');
@@ -101,7 +101,7 @@ while 1
         if (timer>=5)
             incrementer = incrementer+1;
             if(incrementer==30)
-                incrementer=0;
+                incrementer=1;
             end
             currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
             timer=0;
@@ -149,7 +149,7 @@ while 1
      %encoder values mapped to degrees
      baseDeg = baseEncoder / baseScalingFactor;
      shoulderDeg = shoulderEncoder/ baseScalingFactor;
-     elbowDeg = (elbowEncoder/baseScalingFactor-90);
+     elbowDeg = (elbowEncoder/baseScalingFactor)-90;
      
      %velocity values read
      baseVel = returnValues(2);
@@ -174,9 +174,11 @@ while 1
      y2 = cosd(baseDeg) * (y1 + cosd(shoulderDeg) * linkLength);
      z2 = z1 + sind(shoulderDeg) * linkLength;
      
+     l2rad = sqrt(x2^2+y2^2);
+     
      %top of link 3 (elbow)
-     x3 = sind(baseDeg) * (x2 + cosd(elbowDeg+shoulderDeg) * linkLength);
-     y3 = cosd(baseDeg) * (y2 + cosd(elbowDeg+shoulderDeg) * linkLength);
+     x3 = sind(baseDeg) * (l2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
+     y3 = cosd(baseDeg) * (l2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
      z3 = z2 + sind(elbowDeg+shoulderDeg) * linkLength;
      
      %find setpoint in degrees
@@ -190,14 +192,18 @@ while 1
      sz1 = linkLength;
      
      %top of shoulder setpoint
-     sx2 = sind(baseDeg) * (sx1 + cosd(shoulderDeg) * linkLength);
+     sx2 = -sind(baseDeg) * (sx1 + cosd(shoulderDeg) * linkLength);
      sy2 = cosd(baseDeg) * (sy1 + cosd(shoulderDeg) * linkLength);
      sz2 = sz1 + sind(shoulderDeg) * linkLength;
      
+     sl2rad = sqrt(sx2^2+sy2^2);
+     
      %top of elbow setpoint
-     sx3 = sind(baseDeg) * (sx2 + cosd(elbowDeg+shoulderDeg) * linkLength);
-     sy3 = cosd(baseDeg) * (sy2 + cosd(elbowDeg+shoulderDeg) * linkLength);
-     sz3 = sz2 + sind(elbowDeg+shoulderDeg) * linkLength;
+%      sx3 = sx2 + sind(elbowSetDeg+shoulderSetDeg) * linkLength;
+%      sy3 = sy2 - cosd(elbowSetDeg+shoulderSetDeg) * linkLength;
+     sx3 = sind(baseDeg) * (sl2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
+     sy3 = cosd(baseDeg) * (sl2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
+     sz3 = sz2 + sind(elbowDeg+shoulderDeg) * linkLength
      
      
 % %     2D Forward Position Kinematics
