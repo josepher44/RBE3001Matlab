@@ -5,6 +5,8 @@ function M = forPosKinematicsTransformation( q1, q2, q3 )
 
 syms l1 l2 l3
 
+
+
 %M = [nx ox ax px; ny oy ay py1; nz oz az pz; 0 0 0 1];
 M = [cosd(q1)*cosd(q1+q2) -cosd(q1)*sind(q1+q2) sind(q1) (l1 + l2*cosd(q2))*cosd(q1); ...
     sind(q1)*cosd(q1+q2) -sind(q1)*sind(q1+q2) -cosd(q1) (l1 + l2*cosd(q2))*sind(q1); ...
