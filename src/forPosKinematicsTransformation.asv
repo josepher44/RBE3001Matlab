@@ -3,11 +3,11 @@ function M = forPosKinematicsTransformation( q1, q2, q3 )
 %matrix
 %   Detailed explanation goes here
 
+syms l1 l2
 
 %Define DH parameters
 theta1 = q1
 d1 = l1
-a1 = 0
 
 
 

@@ -1,4 +1,7 @@
 function out = dhToTransformMatrix( theta, d, a, alpha )
+%Takes in DH parameters of a joint, and converts to the transformation
+%matrix for this joint, in symbolic form
+
 %Convert angles to radians
 
 thetaR = theta * (pi/180);
