@@ -1,5 +1,5 @@
 tic;
-clc; 
+clc;  
 clear;
 close all;
 javaaddpath('../lib/hid4java-0.5.1.jar');
@@ -22,9 +22,9 @@ y = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  PID
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-baseConstants = [0.005; 0; 0.002;];
-shoulderConstants = [0.004; 0.00002; 0.005;];
-elbowConstants = [0.004; 0; 0.005];
+baseConstants = [0.005; 0; 0.012;];
+shoulderConstants = [0.004; 0.00002; 0.012;];
+elbowConstants = [0.004; 0; 0.012];
 pidConstants = [baseConstants; shoulderConstants; elbowConstants; 0;0;0;0;0;0;];
 
 %send the constants, receive junk from nucleo (dummy values)
@@ -34,16 +34,16 @@ pidJunk = pp.command(39, pidConstants);
 %constant that maps ticks to degrees
 baseScalingFactor = 11.44;
 
-incrementer = 1;
-timer = 0;
+% incrementer = 1;
+% timer = 0;
 %0,365,-295
 %0,-100,825
 %0,777,-140
 
 % %6-8
-setpoints1 = [0 0 0 0 0 -1];
-setpoints2 = [1030 667 311 29 1268 -1];
-setpoints3 = [1030 1417 2109 985 2049 -1];
+% setpoints1 = [0 0 0 0 0 -1];
+% setpoints2 = [1030 667 311 29 1268 -1];
+% setpoints3 = [1030 1417 2109 985 2049 -1];
 
 %9
 %  setpoints1 = [300 -200 150 0];
@@ -55,11 +55,17 @@ setpoints3 = [1030 1417 2109 985 2049 -1];
 % setpoints1 = Array(:, 1);
 % setpoints2 = Array(:, 2);
 % setpoints3 = Array(:, 3);
+
+%   setpoints1 = [0];
+%   setpoints2 = [0];
+%   setpoints3 = [0];
 % 
 % disp(setpoints2);
 % 
- currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
- currentEncoders = [0 0 0];
+% currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
+% currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
+currentSetpoint = [0 0 0];
+currentEncoders = [0 0 0];
 %%Lab 3
 %cam = webcam();
 % while 1
@@ -81,51 +87,83 @@ setpoints3 = [1030 1417 2109 985 2049 -1];
 %         
 % end
 
-
+baseDeg = 0;
+shoulderDeg = 0;
+elbowDeg = 0;
+baseEncoder = 0;
+shoulderEncoder = 0;
+elbowEncoder = 0;
 
 
 tic;
 while 1
-    x= x+ 1;
+%     x= x+ 1;
 
     values = zeros(15, 1, 'single');
     
     %if(incrementer<6)
-    if(incrementer<35)
-    
-        if (isAtSetpoints(currentSetpoint, currentEncoders)==3)
-            timer = timer+1;
-        else
-            timer = 0;
-        end
-        if (timer>=5)
-            incrementer = incrementer+1;
-            if(incrementer==30)
-                incrementer=1;
-            end
-            currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
-            timer=0;
-        end
-        disp(timer);
-        disp(incrementer);
-        values(1)=setpoints1(incrementer);
-        values(4)=setpoints2(incrementer);
-        values(7)=setpoints3(incrementer);
-    
-    end
+%     if(incrementer<5)
+%     
+%         if (isAtSetpoints(currentSetpoint, currentEncoders)==3)
+%             timer = timer+1;
+%         else
+%             timer = 0;
+%         end
+%         if (timer>=15)
+%             incrementer = incrementer+1;
+%             if(incrementer==30)
+%                 incrementer=1;
+%             end
+%             currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
+%             timer=0;
+%         end
+%         disp(timer);
+%         disp(incrementer);
+%         values(1)=setpoints1(incrementer);
+%         values(4)=setpoints2(incrementer);
+%         values(7)=setpoints3(incrementer);
+%     
+%     end
     
     
     tic
     %Process command and print the returning values
+    
+    
+    %We need values to be a matrix of current setpoint + inverse kinematics
+    %of the velocity vector
+    
+%     vel = [0; 0; 50;];
+%     inv = invVelKinematics(vel(1),vel(2),vel(3),baseDeg,shoulderDeg,elbowDeg);
+%     
+%     values(1) = round(baseEncoder+inv(1));
+%     values(4) = round(shoulderEncoder+inv(2));
+%     values(7) = round(elbowEncoder+inv(3));
+    
+        
+    values(1) = round(0);
+    values(4) = round(90*baseScalingFactor);
+    values(7) = round(135*baseScalingFactor);
+    
+
     returnValues = pp.command(38, values);
+    
     %          toc
-    %          disp('sent');
-    %          disp(values);
-    %          disp('got');
-    %          disp(returnValues);
-    disp('Current setpoints');
-    disp(currentSetpoint);
-    disp(currentEncoders);
+    
+%              disp('sent');
+%              disp(values);
+%              disp('got');
+%              disp(returnValues);
+
+             disp('sent');
+             disp([values(1);values(4);values(7)]);
+             disp('got');
+             disp([returnValues(1);returnValues(4);returnValues(7)]);
+
+
+%     disp('Current setpoints');
+%     disp(currentSetpoint);
+%     disp(currentEncoders);
     %Concatenate "loop incrementer" to encoder values
     toWrite = cat(1, x,returnValues);
     %pause(0.1) %timeit(returnValues)
@@ -199,11 +237,14 @@ while 1
      sl2rad = sqrt(sx2^2+sy2^2);
      
      %top of elbow setpoint
-%      sx3 = sx2 + sind(elbowSetDeg+shoulderSetDeg) * linkLength;
-%      sy3 = sy2 - cosd(elbowSetDeg+shoulderSetDeg) * linkLength;
      sx3 = sind(baseDeg) * (sl2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
      sy3 = cosd(baseDeg) * (sl2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
-     sz3 = sz2 + sind(elbowDeg+shoulderDeg) * linkLength
+     sz3 = sz2 + sind(elbowDeg+shoulderDeg) * linkLength;
+     
+%      q = invVelKinematics(5,20,10,baseDeg,shoulderDeg,elbowDeg);
+%      
+%      currentSetpoint = [currentSetpoint(1)+q(1) currentSetpoint(2)+q(2) currentSetpoint(3)+q(3)];
+%      
      
      
 % %     2D Forward Position Kinematics
@@ -255,15 +296,15 @@ while 1
 %      3D plot
        
        
-       plot3([0 x1 x2 x3], [0 y1 y2 y3], [0 z1 z2 z3]);
-       xlim([-300 300]);
-       ylim([-300 300]);
-       zlim([-300 300]);
-       %plot([0 sx1 sx2 sx3], [0 sy1 sy2 sy3],'-o');
-       drawnow;
-       
-       %pause(0.1);
-       clf;
+%        plot3([0 x1 x2 x3], [0 y1 y2 y3], [0 z1 z2 z3]);
+%        xlim([-300 300]);
+%        ylim([-300 300]);
+%        zlim([-300 300]);
+%        %plot([0 sx1 sx2 sx3], [0 sy1 sy2 sy3],'-o');
+%        drawnow;
+%        
+%        %pause(0.1);
+%        clf;
 
 %      
 %      
