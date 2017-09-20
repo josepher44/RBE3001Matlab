@@ -24,7 +24,7 @@ elbowConstants = [0.002; 0; 0.01];
 pidConstants = [baseConstants; shoulderConstants; elbowConstants; 0;0;0;0;0;0;];
 
 %send the constants, receive junk from nucleo (dummy values)
-pidJunk = pp.command(39, pidConstants);
+% % pidJunk = pp.command(39, pidConstants);
 
 %constant that maps ticks to degrees
 baseScalingFactor = 11.44;
@@ -62,7 +62,7 @@ baseScalingFactor = 11.44;
 currentSetpoint = [0 0 0];
 currentEncoders = [0 0 0];
 %%Lab 3
-%cam = webcam();
+cam = webcam();
 % while 1
 %     for times = 1:5
 %         max=100;
@@ -81,53 +81,24 @@ currentEncoders = [0 0 0];
 %     end
 %         
 % end
-
+values = zeros(15, 1, 'single');
 baseDeg = 1;
 shoulderDeg = 1;
 elbowDeg = 1;
 baseEncoder = 1;
 shoulderEncoder = 1;
 elbowEncoder = 1;
-
-
-tic;
+tipPos=[0;0;0];
 while 1
     x = x + 1;
 
     values = zeros(15, 1, 'single');
     
-    %if(incrementer<6)
-%     if(incrementer<5)
-%     
-%         if (isAtSetpoints(currentSetpoint, currentEncoders)==3)
-%             timer = timer+1;
-%         else
-%             timer = 0;
-%         end
-%         if (timer>=15)
-%             incrementer = incrementer+1;
-%             if(incrementer==30)
-%                 incrementer=1;
-%             end
-%             currentSetpoint = [setpoints1(incrementer) setpoints2(incrementer) setpoints3(incrementer)];
-%             timer=0;
-%         end
-%         disp(timer);
-%         disp(incrementer);
-%         values(1)=setpoints1(incrementer);
-%         values(4)=setpoints2(incrementer);
-%         values(7)=setpoints3(incrementer);
-%     
-%     end
-    
-    
-    tic;
-    %Process command and print the returning values
-    
-    
     %We need values to be a matrix of current setpoint + inverse kinematics
     %of the velocity vector
-    
+    [x,y]=findCoords(cam);
+    ballPos = [x;y;10];
+    out = generateVelocity(tipPos,ballPos);
     vel = [0; 10; 0];
     inv = invVelKinematics(vel(1),vel(2),vel(3),baseDeg,shoulderDeg,elbowDeg);
     
@@ -222,6 +193,7 @@ while 1
      y3 = cosd(baseDeg) * (l2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
      z3 = z2 + sind(elbowDeg+shoulderDeg) * linkLength;
      
+     tipPos = [x3;y3;z3];
 %      %find setpoint in degrees
 %      baseSetDeg = currentSetpoint(1)/baseScalingFactor;
 %      shoulderSetDeg = currentSetpoint(2)/baseScalingFactor;

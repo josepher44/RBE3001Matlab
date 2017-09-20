@@ -4,7 +4,7 @@ function out = generateVelocity( armPos, ballPos )
 %velocity setpoint for the robot to pursue the target. It also provides
 %deadband functionality around the target. 
 
-deadband = 0.1
+deadband = 0.1;
 netVector = threeDVector(armPos, ballPos);
 if (norm(netVector)>deadband)
     out = velocityFromVector(netVector);
