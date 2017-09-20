@@ -1,7 +1,5 @@
 tic;
-clc;  
-clear;
-close all;
+clc; clear; close all; delete *.csv;
 javaaddpath('../lib/hid4java-0.5.1.jar');
 
 import org.hid4java.*;
@@ -9,8 +7,6 @@ import org.hid4java.event.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.lang.*;
-
-delete *.csv;
 
 pp = PacketProcessor(7);
 
@@ -22,14 +18,13 @@ y = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  PID
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-baseConstants = [0.005; 0; 0.012;];
-shoulderConstants = [0.004; 0.00002; 0.012;];
-elbowConstants = [0.004; 0; 0.012];
+baseConstants = [0.002; 0; 0.01];
+shoulderConstants = [0.002; 0.00002; 0.01];
+elbowConstants = [0.002; 0; 0.01];
 pidConstants = [baseConstants; shoulderConstants; elbowConstants; 0;0;0;0;0;0;];
 
 %send the constants, receive junk from nucleo (dummy values)
 pidJunk = pp.command(39, pidConstants);
-
 
 %constant that maps ticks to degrees
 baseScalingFactor = 11.44;
@@ -87,17 +82,17 @@ currentEncoders = [0 0 0];
 %         
 % end
 
-baseDeg = 0;
-shoulderDeg = 0;
-elbowDeg = 0;
-baseEncoder = 0;
-shoulderEncoder = 0;
-elbowEncoder = 0;
+baseDeg = 1;
+shoulderDeg = 1;
+elbowDeg = 1;
+baseEncoder = 1;
+shoulderEncoder = 1;
+elbowEncoder = 1;
 
 
 tic;
 while 1
-%     x= x+ 1;
+    x = x + 1;
 
     values = zeros(15, 1, 'single');
     
@@ -126,39 +121,46 @@ while 1
 %     end
     
     
-    tic
+    tic;
     %Process command and print the returning values
     
     
     %We need values to be a matrix of current setpoint + inverse kinematics
     %of the velocity vector
     
-%     vel = [0; 0; 50;];
-%     inv = invVelKinematics(vel(1),vel(2),vel(3),baseDeg,shoulderDeg,elbowDeg);
+    vel = [0; 10; 0];
+    inv = invVelKinematics(vel(1),vel(2),vel(3),baseDeg,shoulderDeg,elbowDeg);
+    
+    
+    values(1) = round(baseEncoder+(inv(1)*baseScalingFactor));
+    values(4) = round(shoulderEncoder+(inv(2)*baseScalingFactor));
+    values(7) = round(elbowEncoder+(inv(3)*baseScalingFactor));
+    values = single(values);
+    currentSetpoint(1) = values(1);
+    currentSetpoint(2) = values(4);
+    currentSetpoint(3) = values(7);
+    
+    
 %     
-%     values(1) = round(baseEncoder+inv(1));
-%     values(4) = round(shoulderEncoder+inv(2));
-%     values(7) = round(elbowEncoder+inv(3));
-    
-        
-    values(1) = round(0);
-    values(4) = round(90*baseScalingFactor);
-    values(7) = round(135*baseScalingFactor);
-    
+%     
+%     values(1) = round(0);
+%     values(4) = round(90*baseScalingFactor);
+%     values(7) = round(135*baseScalingFactor);
+%     
 
     returnValues = pp.command(38, values);
     
-    %          toc
+              toc;
     
 %              disp('sent');
 %              disp(values);
 %              disp('got');
 %              disp(returnValues);
 
-             disp('sent');
-             disp([values(1);values(4);values(7)]);
-             disp('got');
-             disp([returnValues(1);returnValues(4);returnValues(7)]);
+%              disp('sent');
+%              disp([values(1);values(4);values(7)]);
+%              disp('got');
+%              disp([returnValues(1);returnValues(4);returnValues(7)]);
 
 
 %     disp('Current setpoints');
@@ -191,7 +193,7 @@ while 1
      
      %velocity values read
      baseVel = returnValues(2);
-     shoulderVel=returnValues(5);
+     shoulderVel = returnValues(5);
      elbowVel = returnValues(8);
      
      linkLength = 100;
@@ -199,7 +201,8 @@ while 1
      %find setpoint in degrees
      baseSetDeg = currentSetpoint(1)/baseScalingFactor;
      shoulderSetDeg = currentSetpoint(2)/baseScalingFactor;
-     elbowSetDeg = currentSetpoint(3)/baseScalingFactor;
+     elbowSetDeg = (currentSetpoint(3)/baseScalingFactor)-90;
+     
 
     %3D Forward Position Kinematics
      %top of link 1 (base)
@@ -219,10 +222,10 @@ while 1
      y3 = cosd(baseDeg) * (l2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
      z3 = z2 + sind(elbowDeg+shoulderDeg) * linkLength;
      
-     %find setpoint in degrees
-     baseSetDeg = currentSetpoint(1)/baseScalingFactor;
-     shoulderSetDeg = currentSetpoint(2)/baseScalingFactor;
-     elbowSetDeg = currentSetpoint(3)/baseScalingFactor;
+%      %find setpoint in degrees
+%      baseSetDeg = currentSetpoint(1)/baseScalingFactor;
+%      shoulderSetDeg = currentSetpoint(2)/baseScalingFactor;
+%      elbowSetDeg = currentSetpoint(3)/baseScalingFactor;
      
      %top of arm setpoint
      sx1 = 0;
@@ -230,16 +233,16 @@ while 1
      sz1 = linkLength;
      
      %top of shoulder setpoint
-     sx2 = -sind(baseDeg) * (sx1 + cosd(shoulderDeg) * linkLength);
-     sy2 = cosd(baseDeg) * (sy1 + cosd(shoulderDeg) * linkLength);
-     sz2 = sz1 + sind(shoulderDeg) * linkLength;
+     sx2 = sind(baseSetDeg) * (sx1 + cosd(shoulderSetDeg) * linkLength);
+     sy2 = cosd(baseSetDeg) * (sy1 + cosd(shoulderSetDeg) * linkLength);
+     sz2 = sz1 + sind(shoulderSetDeg) * linkLength;
      
      sl2rad = sqrt(sx2^2+sy2^2);
      
      %top of elbow setpoint
-     sx3 = sind(baseDeg) * (sl2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
-     sy3 = cosd(baseDeg) * (sl2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
-     sz3 = sz2 + sind(elbowDeg+shoulderDeg) * linkLength;
+     sx3 = sind(baseSetDeg) * (sl2rad + cosd(elbowSetDeg+shoulderSetDeg) * linkLength);
+     sy3 = cosd(baseSetDeg) * (sl2rad + cosd(elbowSetDeg+shoulderSetDeg) * linkLength);
+     sz3 = sz2 + sind(elbowSetDeg+shoulderSetDeg) * linkLength;
      
 %      q = invVelKinematics(5,20,10,baseDeg,shoulderDeg,elbowDeg);
 %      
@@ -294,17 +297,18 @@ while 1
 
 
 %      3D plot
+        hold on;
+        plot3([0 x1 x2 x3], [0 y1 y2 y3], [0 z1 z2 z3]);
+        plot3([0 sx1 sx2 sx3], [0 sy1 sy2 sy3],[0 sz1 sz2 sz3]);
+
+        xlim([-300 300]);
+        ylim([-300 300]);
+        zlim([-300 300]);
+        hold off;
+%         drawnow;
        
-       
-%        plot3([0 x1 x2 x3], [0 y1 y2 y3], [0 z1 z2 z3]);
-%        xlim([-300 300]);
-%        ylim([-300 300]);
-%        zlim([-300 300]);
-%        %plot([0 sx1 sx2 sx3], [0 sy1 sy2 sy3],'-o');
-%        drawnow;
-%        
-%        %pause(0.1);
-%        clf;
+        pause(0.1);
+
 
 %      
 %      

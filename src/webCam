@@ -1,0 +1,19 @@
+cam = webcam();
+while 1
+    img = snapshot(WebCam);
+    img = imresize(img,0.7);
+    findRedCircle(img);
+    masked = createMask(img);
+    %%masked = bwareafilt(masked,1); remove largest
+    maskedFixed = bwareaopen(masked,50);
+    %      maskedGPU = gpuArray(masked);
+    stats = regionprops('table',maskedFixed,'Centroid',...
+        'MajorAxisLength','MinorAxisLength')
+    centers = stats.Centroid;
+    diameters = mean([stats.MajorAxisLength stats.MinorAxisLength],2);
+    radii = diameters/2;
+    hold on
+    imshow(img)
+    viscircles(centers,radii);
+    hold off
+end
