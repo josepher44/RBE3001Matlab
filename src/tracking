@@ -1,0 +1,2 @@
+info = imawhwinfo;
+[name,id,format] = getCamerainfo(a);
