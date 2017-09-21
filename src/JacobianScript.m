@@ -22,7 +22,7 @@ t2 = deg2rad(t2);
 r3 = dh3(3);
 a3 = dh3(4);
 a3 = deg2rad(a3);
-    syms symt symd symr syma q1 q2 q3;
+    syms symt symd symr syma q1 q2 q3 real;
     A = [ cos(symt) -sin(symt)*cos(syma) sin(symt)*sin(syma) symr*cos(symt);
           sin(symt) cos(symt)*cos(syma) -cos(symt)*sin(syma) symr*sin(syma);
           0 sin(syma) cos(syma) symd;

@@ -1,4 +1,4 @@
-tic;
+
 clc; clear; close all; delete *.csv;
 javaaddpath('../lib/hid4java-0.5.1.jar');
 
@@ -8,7 +8,16 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.lang.*;
 
+
+% figure(1);
+% xStuff = [0 0 0 0 0];
+% yStuff = [0 0 0 0 0];
+% zStuff = [0 0 0 0 0];
+% plot = plot3(xStuff,yStuff,zStuff);
+
+
 pp = PacketProcessor(7);
+
 
 %Create an array of 32 bit floating point zeros to load an pass to the
 %packet processor
@@ -18,7 +27,7 @@ y = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  PID
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-baseConstants = [0.002; 0; 0.01];
+baseConstants = [0.001; 0; 0.01];
 shoulderConstants = [0.002; 0.00002; 0.01];
 elbowConstants = [0.002; 0; 0.01];
 pidConstants = [baseConstants; shoulderConstants; elbowConstants; 0;0;0;0;0;0;];
@@ -85,10 +94,17 @@ values = zeros(15, 1, 'single');
 baseDeg = 1;
 shoulderDeg = 1;
 elbowDeg = 1;
+lastBase = 0;
+lastShoulder = 0;
+lastElbow = 0;
 baseEncoder = 1;
 shoulderEncoder = 1;
 elbowEncoder = 1;
 tipPos=[0;0;0];
+x3=0;
+y3=0;
+z3=0;
+tic;
 while 1
     x = x + 1;
 
@@ -96,13 +112,21 @@ while 1
     
     %We need values to be a matrix of current setpoint + inverse kinematics
     %of the velocity vector
-    [x,y]=findCoords(cam);
-    ballPos = [x;y;10];
-    out = generateVelocity(tipPos,ballPos);
-    vel = [0; 10; 0];
+    img = snapshot(cam);
+    [coords]=findRedFast(img);
+    if (length(coords)==0)
+        coords = [0,0];
+    end
+    [ballX,ballY]= mn2xy(coords(1),coords(2));
+    ballPos = [ballX+20;ballY;2]
+    tipPos = [x3;y3;z3]
+%     diff = [x3-(ballX+20); y3 - ballY; 0]
+    diff = [(ballX+20)-x3; -(ballY-y3); 0]
+    disp([ballPos,tipPos,diff])
+    vel = diff*2;
+%     vel = [0;-20;0]
     inv = invVelKinematics(vel(1),vel(2),vel(3),baseDeg,shoulderDeg,elbowDeg);
-    
-    
+    disp(vel);
     values(1) = round(baseEncoder+(inv(1)*baseScalingFactor));
     values(4) = round(shoulderEncoder+(inv(2)*baseScalingFactor));
     values(7) = round(elbowEncoder+(inv(3)*baseScalingFactor));
@@ -121,7 +145,6 @@ while 1
 
     returnValues = pp.command(38, values);
     
-              toc;
     
 %              disp('sent');
 %              disp(values);
@@ -163,11 +186,11 @@ while 1
      elbowDeg = (elbowEncoder/baseScalingFactor)-90;
      
      %velocity values read
-     baseVel = returnValues(2);
-     shoulderVel = returnValues(5);
-     elbowVel = returnValues(8);
+%      baseVel = returnValues(2);
+%      shoulderVel = returnValues(5);
+%      elbowVel = returnValues(8);
      
-     linkLength = 100;
+     linkLength = 20;
 
      %find setpoint in degrees
      baseSetDeg = currentSetpoint(1)/baseScalingFactor;
@@ -182,18 +205,17 @@ while 1
      z1 = linkLength;
      
      %top of link 2 (shoulder)
-     x2 = sind(baseDeg) * (x1 + cosd(shoulderDeg) * linkLength);
-     y2 = cosd(baseDeg) * (y1 + cosd(shoulderDeg) * linkLength);
+     y2 = sind(baseDeg) * (x1 + cosd(shoulderDeg) * linkLength);
+     x2 = cosd(baseDeg) * (y1 + cosd(shoulderDeg) * linkLength);
      z2 = z1 + sind(shoulderDeg) * linkLength;
      
      l2rad = sqrt(x2^2+y2^2);
      
      %top of link 3 (elbow)
-     x3 = sind(baseDeg) * (l2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
-     y3 = cosd(baseDeg) * (l2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
+     y3 = sind(baseDeg) * (l2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
+     x3 = cosd(baseDeg) * (l2rad + cosd(elbowDeg+shoulderDeg) * linkLength);
      z3 = z2 + sind(elbowDeg+shoulderDeg) * linkLength;
      
-     tipPos = [x3;y3;z3];
 %      %find setpoint in degrees
 %      baseSetDeg = currentSetpoint(1)/baseScalingFactor;
 %      shoulderSetDeg = currentSetpoint(2)/baseScalingFactor;
@@ -268,20 +290,44 @@ while 1
 %      clf;
 
 
-%      3D plot
-        hold on;
-        plot3([0 x1 x2 x3], [0 y1 y2 y3], [0 z1 z2 z3]);
-        plot3([0 sx1 sx2 sx3], [0 sy1 sy2 sy3],[0 sz1 sz2 sz3]);
+% %      3D plot
+%         figure(1)
+%         xStuff = [0 x1 x2 x3 ballX+20];
+%         yStuff = [0 y1 y2 y3 ballY];
+%         zStuff = [0 z1 z2 z3 0];
+% 
+%         set(plot,'xData',xStuff,'yData',yStuff,'zData',zStuff);
+%         hold on;
+% %         plot3([0 sx1 sx2 sx3], [0 sy1 sy2 sy3],[0 sz1 sz2 sz3]);
+%         xlim([-60 60]);
+%         ylim([-60 60]);
+%         zlim([-60 60]);
+%         hold off;
+%         pause(0.1);
 
-        xlim([-300 300]);
-        ylim([-300 300]);
-        zlim([-300 300]);
-        hold off;
-%         drawnow;
-       
-        pause(0.1);
-
-
+%       baseVel = baseDeg -lastBase;
+%       shoulderVel = shoulderDeg - lastShoulder;
+%       elbowVel = elbowDeg - lastElbow;
+%       vtoCSV = forVelKinematics(baseVel, shoulderVel, elbowVel, x3, y3, z3);
+%       dlmwrite('tip.csv', [baseDeg shoulderDeg elbowDeg baseVel shoulderVel elbowVel x3 y3 z3 vtoCSV(1) vtoCSV(2) vtoCSV(3) norm(vtoCSV(1),vtoCSV(2),vtoCSV(3)) ballPos(1) ballPos(2)], '-append');
+%       Array=csvread('tip.csv');
+%       
+% 
+%       %
+%       
+%       col2 = Array(:, 13);
+%       plot(col2);
+%       
+%       %Tip plot 2d
+%       col1 = Array(:, 7);
+%       col2 = Array(:, 8);
+%       plot(col1,col2);
+%       axis([0 40 -20 20])
+%       
+%       lastBase = baseDeg;
+%       lastShoulder = shoulderDeg;
+%       lastElbow = elbowDeg;
+      
 %      
 %      
 %      Array=csvread('Lab2CSV.csv');
