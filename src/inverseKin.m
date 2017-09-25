@@ -1,12 +1,21 @@
-function out = inverseKin( x, z, l1, l2 )
-%Converts an x and y coordinate into joint angles, 
-%   Detailed explanation goes here
+function out = inverseKin( x, y, z, l1, l2, l3 )
+%Converts an x, y, and z coordinate into joint angles, 
 
-%calculate joint angles
-q2 = acosd((y^2+x^2-l1^2-l2^2)/(2*l1*l2))+90;
-q1 = (-z*l2*sind(q2)+x*(l1+l2*cosd(q2)))/(x*l2*sind(q2)+z*(l1+l2*cos(q2)));
+%Offsets Z by a constant value to account for L1 length (only time this
+%impacts anything)
+z = z+l1;
+
+%calculate joint angle 1
+q1 = atand(y/x);
+
+%Calculates r, since this is used repeatedly
+r = x*cos(q1);
+
+%Calculates remaining angles
+q3 = acosd((r^2+z^2-(l2^2+l3^2))/(2*l2*l3))+90;
+q2 = atand(z/r) + acosd((r^2+z^2+l2+l3)/(2*l2*sqrt(r^2+z&2)));
 
 %Append angles into matrix
-out = [q1;q2];
+out = [q1;q2;q3];
 end
 
