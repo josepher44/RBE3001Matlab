@@ -1,4 +1,4 @@
-function isatsetpoints = isAtSetpoints(setpoints, encoders)
+function isatsetpoints = isAtSetpoint(setpoints, encoders)
    accuracy = 0.05;
    
    range1 = 2310;
