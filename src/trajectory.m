@@ -12,7 +12,7 @@ tMax = n*timeStep;
 A = [1 tStart tStart^2 tStart^3;
      0 1      2*tStart 3*tStart^2;
      1 tEnd   tEnd^2   tEnd^3;
-     0 1      2*tEnd   3*tStart^2];
+     0 1      2*tEnd   3*tEnd^2];
  
 %Create column vector of position and velocity
 q = [pStart;vStart;pEnd;vEnd]
@@ -35,7 +35,7 @@ for x = 0:n
    vnew = velocity(time);
    anew = acceleration(time);
    out = [out;time pnew vnew anew];
-   out = double(out)
+   out = double(out);
    %generate some position function
    %take first and second derivatives
    %find setpoints along that trajectory in pos vel and accel
