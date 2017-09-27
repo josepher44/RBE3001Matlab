@@ -15,7 +15,7 @@ rate = difference/points;
 
 setpoints=[];
 for x = 0:points
-    setpoints = [setpoints; start+rate*x]
+    setpoints = [setpoints; start+rate*x];
 end
 
 

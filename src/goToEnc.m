@@ -1,4 +1,4 @@
-function [bool] = goToEnc( e1,e2,e3,pp )
+function [bool, returnValues] = goToEnc( e1,e2,e3,pp )
 
 values = zeros(15, 1, 'single');
 
@@ -20,7 +20,7 @@ values = single(values);
 
 returnValues = pp.command(38, values);
 
-encoders = [returnValues(1),returnValues(2),returnValues(3)]
+encoders = [returnValues(1),returnValues(4),returnValues(7)]
 setpoints = [e1 e2 e3];
 if(isAtSetpoint(setpoints,encoders)==3)
     bool = true;
