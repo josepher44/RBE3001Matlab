@@ -1,4 +1,4 @@
-function [tip] = plot3d(returnValues, currentSetpoint, plotVar,setpoints,tip)
+function [tip,deg] = plot3d(returnValues, currentSetpoint, plotVar,setpoints,tip,deg)
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 Array = [0,0,0];
@@ -55,9 +55,9 @@ z3 = z2 + sind(elbowDeg+shoulderDeg) * linkLength;
 
 %Write tip position to csv
 time = toc;
-% dlmwrite('tip.csv', transpose([x3; y3; z3; time]), '-append');
-% 
-% Array=csvread('tip.csv');
+dlmwrite('tip.csv', transpose([x3; y3; z3; time]), '-append');
+
+Array=csvread('tip.csv');
 
 
 %find setpoint in degrees
@@ -98,19 +98,30 @@ ylim([-300 300]);
 zlim([0 300]);
 hold off;
 
-% figure(10)
-% tip = [tip;time,x3,y3,z3];
-% timeMatrix = tip(:,1);
-% x3mult=tip(:,2);
-% y3mult=tip(:,3);
-% z3mult=tip(:,4);
-% plot(timeMatrix,x3mult,timeMatrix,y3mult,timeMatrix,z3mult);
-
+figure(10)
+tip = [tip;time,x3,y3,z3];
+timeMatrix = tip(:,1);
+x3mult=tip(:,2);
+y3mult=tip(:,3);
+z3mult=tip(:,4);
+plot(timeMatrix,x3mult,timeMatrix,y3mult,timeMatrix,z3mult);
 legend('x','y','z');
 % plot(time,xAccel,time,yAccel,time,zAccel);
 % 
-% figure(11);
-% plot(setpoints);
+ figure(11);
+ plot(setpoints);
+figure(15);
+deg = [deg;time,baseDeg,shoulderDeg,elbowDeg];
+timeMatrix2 = deg(:,1);
+baseDegMatrix = deg(:,2);
+shoulderDegMatrix = deg(:,3);
+elbowDegMatrix = deg(:,4);
+
+
+plot(timeMatrix2,baseDegMatrix,timeMatrix2,shoulderDegMatrix,timeMatrix2,elbowDegMatrix);
+legend('q1','q2','q3');
+
+
 
 end
 

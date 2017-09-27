@@ -28,9 +28,9 @@ zAccel = zValues(:,4);
 % figure(3)
 % plot(time,xVel,time,yVel,time,zVel);
 % legend('x','y','z');
-figure(4)
-plot(time,xAccel,time,yAccel,time,zAccel);
-legend('x','y','z');
+% figure(4)
+% plot(time,xAccel,time,yAccel,time,zAccel);
+% legend('x','y','z');
 
 x = xPos;
 y = yPos;
