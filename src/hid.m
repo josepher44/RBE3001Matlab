@@ -47,9 +47,10 @@ currentElbow = 30;
 setpointIncrementer=0;
 
 %setpoints = [interpolate(set(1,:),set(2,:),20); interpolate(set(2,:),set(3,:),20); interpolate(set(3,:),set(1,:),20);];
-%setpoints = [trajectory3d(45,60,30,45,-60,30); trajectory3d(45,-60,30,45,0,60); trajectory3d(45,0,60,45,60,30)]; 
- set2 = [45,60,30];
- setpoints = set2;
+setpoints = [trajectory3d(45,60,30,45,-60,30); trajectory3d(45,-60,30,45,0,60); trajectory3d(45,0,60,45,60,30)]; 
+%  set2 = [45,60,30;
+%          ];
+%  setpoints = set2;
 % setpoints = [interpolate(set2(1,:),set2(2,:),20); interpolate(set2(2,:),set2(3,:),20); interpolate(set2(3,:),set2(1,:),20);]
 % setpoints = [trajectory3d(30,-30,100,-30,-30,100); trajectory3d(-30,-30,100,-30,30,100); 
 %             trajectory3d(-30,30,100,30,30,100);trajectory3d(30,30,100,30,-30,100);
@@ -72,9 +73,9 @@ while 1
     
     if success
         setpointIncrementer=setpointIncrementer+1;
-%         currentBase=setpoints(setpointIncrementer,1); 
-%         currentShoulder=setpoints(setpointIncrementer,2);
-%         currentElbow=setpoints(setpointIncrementer,3);
+        currentBase=setpoints(setpointIncrementer,1); 
+        currentShoulder=setpoints(setpointIncrementer,2);
+        currentElbow=setpoints(setpointIncrementer,3);
     end
     
     if setpointIncrementer==(length(setpoints))
@@ -93,7 +94,7 @@ while 1
     %encoder values mapped to degrees
     baseDeg = baseEncoder / baseScalingFactor;
     shoulderDeg = shoulderEncoder/ baseScalingFactor;
-    elbowDeg = (elbowEncoder/baseScalingFactor)-90;
+    elbowDeg = (elbowEncoder/baseScalingFactor)-90;,
     
     [tip,deg] = plot3d(returnValues,currentSetpoint,plotVar,setpoints,tip,deg);
     pause(0.1);
