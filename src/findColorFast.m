@@ -1,6 +1,14 @@
-function [coordinates] = findColorFast(img) 
-    bw = testcreateMask(img);
-SE3 = strel('disk', 15) 
+function [x,y] = findColorFast(img) 
+    blackMask = (img(:,:,1)+img(:,:,2)+img(:,:,3)>50);
+    colorMask = testcreateMask(img);
+    bw = blackMask&colorMask;
+%     figure(1);
+%     imshow(colorMask);
+%     figure(2);
+%     imshow(blackMask);
+%     figure(3);
+%     imshow(blackMask&colorMask)
+    SE3 = strel('disk', 21);
     
     bw = imerode(bw,SE3);
     %bw = imdilate(bw,SE3);
@@ -8,7 +16,8 @@ SE3 = strel('disk', 15)
 %     dilatedBW = imdilate(bw,se);
     figure(2)
     stats = regionprops(bw,'BoundingBox','Centroid');
-     imshow(img);
+    %imshow(img);
+    imshow(bw);
     hold on;
     c=[,];
     for object = 1:length(stats)
@@ -31,7 +40,12 @@ SE3 = strel('disk', 15)
     % TR = 1306, 404
     % BL = 425, 1065
     % BR = 1462 1077
-    coordinates = c;
+    if(length(c)>0)
+        [x,y] = mn2xy(c(1),c(2));
+    else
+        x=-10000;
+        y=-10000;
+    end
     hold off;
 end
 
