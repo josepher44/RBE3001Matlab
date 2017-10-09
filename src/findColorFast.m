@@ -1,10 +1,9 @@
-function [coordinates] = findRedFast(img) 
-    diff = imsubtract(img(:,:,1), rgb2gray(img)); %remove blue part of image
-    diff = medfilt2(diff, [3 3]); %filter out any strange values
-%     imshow(img);
-    diff = imbinarize(diff,0.1); %turn this into a binary file
-%     diff = bwareaopen(diff,300);
-    bw = bwlabel(diff,8);
+function [coordinates] = findColorFast(img) 
+    bw = testcreateMask(img);
+SE3 = strel('disk', 15) 
+    
+    bw = imerode(bw,SE3);
+    %bw = imdilate(bw,SE3);
 %     se = strel('disk',5);
 %     dilatedBW = imdilate(bw,se);
     figure(2)
