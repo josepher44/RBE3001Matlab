@@ -7,7 +7,7 @@ function [boolean] = isWithinBox(x,y)
     % BL = 425, 1065
     % BR = 1462 1077
 
-boolean = (x<1462)&&(x>425)&&(y<1077)&&(y>345);
+boolean = (y<540)&&(y>115)&&(x<515)&&(x>160);
 
 end
 

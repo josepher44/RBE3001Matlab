@@ -1,4 +1,6 @@
 while 1
    img = snapshot(cam);
-   findColorFast(img);
+   img3 = fliplr(flipud(img));
+   [x,y] = findColorFast(img3);
+   x
 end

@@ -1,37 +1,38 @@
 function [x,y] = findColorFast(img) 
-    blackMask = (img(:,:,1)+img(:,:,2)+img(:,:,3)>50);
-    colorMask = testcreateMask(img);
-    bw = blackMask&colorMask;
+    %blackMask = (img(:,:,1)+img(:,:,2)+img(:,:,3)>50);
+    colorMask = createMaskMk3(img);
+    bw = colorMask;
 %     figure(1);
 %     imshow(colorMask);
 %     figure(2);
 %     imshow(blackMask);
 %     figure(3);
 %     imshow(blackMask&colorMask)
-    SE3 = strel('disk', 21);
-    
+    SE2 = strel('disk', 1);
+    SE3 = strel('disk', 10);
+    bw = imdilate(bw,SE2);
     bw = imerode(bw,SE3);
-    %bw = imdilate(bw,SE3);
+    %
 %     se = strel('disk',5);
 %     dilatedBW = imdilate(bw,se);
     figure(2)
     stats = regionprops(bw,'BoundingBox','Centroid');
     %imshow(img);
-    imshow(bw);
+    imshow(img);
     hold on;
     c=[,];
     for object = 1:length(stats)
         if isWithinBox(stats(object).Centroid(1),stats(object).Centroid(2))
             bb = stats(object).BoundingBox;
             bc = stats(object).Centroid;
-            rectangle('Position',bb,'EdgeColor','r','LineWidth',2)
-            plot(bc(1),bc(2), '-m+')
-            c = [c;stats(object).Centroid(1),stats(object).Centroid(2)]
+            rectangle('Position',bb,'EdgeColor','r','LineWidth',2);
+            plot(bc(1),bc(2), '-m+');
+            c = [c;stats(object).Centroid(1),stats(object).Centroid(2)];
         else
-            bb = stats(object).BoundingBox;
-            bc = stats(object).Centroid;
-            rectangle('Position',bb,'EdgeColor','b','LineWidth',2)
-             plot(bc(1),bc(2), '-m+')
+%             bb = stats(object).BoundingBox;
+%             bc = stats(object).Centroid;
+%             rectangle('Position',bb,'EdgeColor','b','LineWidth',2)
+%             plot(bc(1),bc(2), '-m+')
         end
 
     end

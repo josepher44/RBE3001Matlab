@@ -14,6 +14,7 @@ end
 
 %% Request two points from user to define bounding box
 img = snapshot(cam);
+img = fliplr(flipud(img));
 imshow(img);
 [x, y] = getpts;
 save_calibration_points(x,y);

@@ -32,7 +32,7 @@ arm_width_in_pix  = arm_pixels(end,1) - arm_pixels(1,1);
 
 %% calculate x using n
 x = (tot_height_in_cm/tot_height_in_pix)*(n - hole_pixel(2));
-
+x = x + yCorrection(x);
 %% calculate y using m and n
 sf_cam = (tot_width_in_cm/cam_width_in_pix); %interpolate between
 sf_arm = (tot_width_in_cm/arm_width_in_pix);
