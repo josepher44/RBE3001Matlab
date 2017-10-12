@@ -20,7 +20,7 @@ values = single(values);
 
 returnValues = pp.command(38, values);
 
-encoders = [returnValues(1),returnValues(4),returnValues(7)]
+encoders = [returnValues(1),returnValues(4),returnValues(7)];
 setpoints = [e1 e2 e3];
 if(isAtSetpoint(setpoints,encoders)==3)
     bool = true;

@@ -10,7 +10,7 @@ function isatsetpoints = isAtSetpoint(setpoints, encoders)
    for i=1:3
        if abs(setpoints(i)-encoders(i))<cutoff(i)
            isatsetpoints= isatsetpoints+ 1;
-           disp("At setpoint!");
+           %disp("At setpoint!");
        else
            isatsetpoints= 0;
        end

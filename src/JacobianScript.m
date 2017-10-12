@@ -1,3 +1,4 @@
+function out = jacobian(q1 q2 q3
 syms q1 q2 q3 l1 l2 l3;
 
 % order: delta, theta, radius, alpha:
@@ -20,7 +21,7 @@ d3 = dh3(1);
 t3 = dh3(2);
 t2 = deg2rad(t2);
 r3 = dh3(3);
-a3 = dh3(4);
+a3 = dh3(4);-
 a3 = deg2rad(a3);
     syms symt symd symr syma q1 q2 q3 real;
     A = [ cos(symt) -sin(symt)*cos(syma) sin(symt)*sin(syma) symr*cos(symt);

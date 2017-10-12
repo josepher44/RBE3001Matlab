@@ -8,7 +8,7 @@ P = [q0,q1,q2]*11.44;
 values = zeros(15, 1, 'single');
 
 
-% 
+%
 if(isreal(q0) && isreal(q1) && isreal(q2))
     values(1) = round(P(1));
     values(4) = round(P(2));
@@ -16,12 +16,13 @@ if(isreal(q0) && isreal(q1) && isreal(q2))
     values = single(values);
     returnValues = pp.command(38, values);
     encoders = [returnValues(1),returnValues(4),returnValues(7)];
-end
-
-
-setpoints = transpose(P);
-if(isAtSetpoint(setpoints,encoders)==3)
-   bool = true;
+    
+    setpoints = transpose(P);
+    if(isAtSetpoint(setpoints,encoders)==3)
+        bool = true;
+    else
+        bool = false;
+    end
 else
     bool = false;
 end
